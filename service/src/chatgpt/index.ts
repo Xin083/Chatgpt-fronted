@@ -15,12 +15,12 @@ const { HttpsProxyAgent } = httpsProxyAgent
 dotenv.config()
 
 const ErrorCodeMessage: Record<string, string> = {
-  401: '[OpenAI] 提供错误的API密钥 | Incorrect API key provided',
-  403: '[OpenAI] 服务器拒绝访问，请稍后再试 | Server refused to access, please try again later',
-  502: '[OpenAI] 错误的网关 |  Bad Gateway',
-  503: '[OpenAI] 服务器繁忙，请稍后再试 | Server is busy, please try again later',
-  504: '[OpenAI] 网关超时 | Gateway Time-out',
-  500: '[OpenAI] 服务器繁忙，请稍后再试 | Internal Server Error',
+  401: '[DeepSeek] 提供错误的API密钥 | Incorrect API key provided',
+  403: '[DeepSeek] 服务器拒绝访问，请稍后再试 | Server refused to access, please try again later',
+  502: '[DeepSeek] 错误的网关 |  Bad Gateway',
+  503: '[DeepSeek] 服务器繁忙，请稍后再试 | Server is busy, please try again later',
+  504: '[DeepSeek] 网关超时 | Gateway Time-out',
+  500: '[DeepSeek] 服务器繁忙，请稍后再试 | Internal Server Error',
 }
 
 const timeoutMs: number = !isNaN(+process.env.TIMEOUT_MS) ? +process.env.TIMEOUT_MS : 100 * 1000
@@ -38,12 +38,13 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
   // More Info: https://github.com/transitive-bullshit/chatgpt-api
 
   if (isNotEmptyString(process.env.OPENAI_API_KEY)) {
-    const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL
+    const OPENAI_API_BASE_URL = process.env.OPENAI_API_BASE_URL || 'https://api.deepseek.com/v1'
 
     const options: ChatGPTAPIOptions = {
       apiKey: process.env.OPENAI_API_KEY,
       completionParams: { model },
       debug: !disableDebug,
+      apiBaseUrl: OPENAI_API_BASE_URL,
     }
 
     // increase max token limit if use gpt-4
@@ -72,14 +73,6 @@ let api: ChatGPTAPI | ChatGPTUnofficialProxyAPI
         options.maxModelTokens = 16384
         options.maxResponseTokens = 4096
       }
-    }
-
-    if (isNotEmptyString(OPENAI_API_BASE_URL)) {
-      // if find /v1 in OPENAI_API_BASE_URL then use it
-      if (OPENAI_API_BASE_URL.includes('/v1'))
-        options.apiBaseUrl = `${OPENAI_API_BASE_URL}`
-      else
-        options.apiBaseUrl = `${OPENAI_API_BASE_URL}/v1`
     }
 
     setupProxy(options)
@@ -201,30 +194,22 @@ async function chatConfig() {
   })
 }
 
-function setupProxy(options: SetProxyOptions) {
-  if (isNotEmptyString(process.env.SOCKS_PROXY_HOST) && isNotEmptyString(process.env.SOCKS_PROXY_PORT)) {
-    const agent = new SocksProxyAgent({
-      hostname: process.env.SOCKS_PROXY_HOST,
-      port: process.env.SOCKS_PROXY_PORT,
-      userId: isNotEmptyString(process.env.SOCKS_PROXY_USERNAME) ? process.env.SOCKS_PROXY_USERNAME : undefined,
-      password: isNotEmptyString(process.env.SOCKS_PROXY_PASSWORD) ? process.env.SOCKS_PROXY_PASSWORD : undefined,
-    })
-    options.fetch = (url, options) => {
-      return fetch(url, { agent, ...options })
-    }
-  }
-  else if (isNotEmptyString(process.env.HTTPS_PROXY) || isNotEmptyString(process.env.ALL_PROXY)) {
-    const httpsProxy = process.env.HTTPS_PROXY || process.env.ALL_PROXY
-    if (httpsProxy) {
+function setupProxy(options: ChatGPTAPIOptions | ChatGPTUnofficialProxyAPIOptions) {
+  const httpsProxy = process.env.HTTPS_PROXY || process.env.ALL_PROXY
+  const socksProxy = (process.env.SOCKS_PROXY_HOST && process.env.SOCKS_PROXY_PORT)
+    ? `${process.env.SOCKS_PROXY_HOST}:${process.env.SOCKS_PROXY_PORT}`
+    : null
+
+  if (httpsProxy) {
+    options.fetch = (input: string | URL | Request, init?: RequestInit) => {
       const agent = new HttpsProxyAgent(httpsProxy)
-      options.fetch = (url, options) => {
-        return fetch(url, { agent, ...options })
-      }
+      return fetch(input as URL | RequestInfo, { ...init, agent })
     }
   }
-  else {
-    options.fetch = (url, options) => {
-      return fetch(url, { ...options })
+  else if (socksProxy) {
+    const agent = new SocksProxyAgent(socksProxy)
+    options.fetch = (input: string | URL | Request, init?: RequestInit) => {
+      return fetch(input as URL | RequestInfo, { ...init, agent })
     }
   }
 }

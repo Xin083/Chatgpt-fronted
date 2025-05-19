@@ -52,7 +52,7 @@ onMounted(() => {
             href="https://github.com/Chanzhaoyu/chatgpt-web"
             target="_blank"
           >
-            GitHub
+            <!--            GitHub -->
           </a>
           {{ $t("setting.freeMIT") }}
         </p>

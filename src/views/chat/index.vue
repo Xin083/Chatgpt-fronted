@@ -15,6 +15,7 @@ import { useBasicLayout } from '@/hooks/useBasicLayout'
 import { useChatStore, usePromptStore } from '@/store'
 import { fetchChatAPIProcess } from '@/api'
 import { t } from '@/locales'
+import Donation from '@/views/chat/Donation.vue'
 
 let controller = new AbortController()
 
@@ -409,7 +410,9 @@ function handleStop() {
 // 理想状态下其实应该是key作为索引项,但官方的renderOption会出现问题，所以就需要value反renderLabel实现
 const searchOptions = computed(() => {
   if (prompt.value.startsWith('/')) {
-    return promptTemplate.value.filter((item: { key: string }) => item.key.toLowerCase().includes(prompt.value.substring(1).toLowerCase())).map((obj: { value: any }) => {
+    return promptTemplate.value.filter((item: {
+      key: string
+    }) => item.key.toLowerCase().includes(prompt.value.substring(1).toLowerCase())).map((obj: { value: any }) => {
       return {
         label: obj.value,
         value: obj.value,
@@ -479,6 +482,7 @@ onUnmounted(() => {
                 <SvgIcon icon="ri:bubble-chart-fill" class="mr-2 text-3xl" />
                 <span>{{ t('chat.newChatTitle') }}</span>
               </div>
+              <Donation />
             </template>
             <template v-else>
               <div>
