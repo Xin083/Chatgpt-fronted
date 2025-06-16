@@ -372,3 +372,5 @@ pnpm dev
 
 cd service
 pnpm start
+
+git add service/package.json && git commit -m "fix: use mv command to rename output file instead of --outExtension" && git push -u origin

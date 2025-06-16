@@ -1,5 +1,6 @@
 {
   "name": "chatgpt-web-service",
+  "type": "module",
   "version": "1.0.0",
   "private": false,
   "description": "ChatGPT Web Service",
@@ -14,10 +15,10 @@
     "node": "^16 || ^18 || ^20"
   },
   "scripts": {
-    "start": "esno ./src/index.ts",
-    "dev": "esno watch ./src/index.ts",
+    "start": "node build/index.mjs",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
     "prod": "node ./build/index.mjs",
-    "build": "pnpm clean && tsup",
+    "build": "pnpm clean && tsup src/index.ts --format esm --dts --clean --outDir build && mv build/index.js build/index.mjs && ls -lR ./src && ls -lR ./build",
     "clean": "rimraf build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -41,7 +42,7 @@
     "@types/node": "^18.14.6",
     "eslint": "^8.35.0",
     "rimraf": "^4.3.0",
-    "tsup": "^6.6.3",
+    "tsup": "^8.5.0",
     "typescript": "^4.9.5"
   }
 }

@@ -8,7 +8,7 @@ import fetch from 'node-fetch'
 import { sendResponse } from '../utils'
 import { isNotEmptyString } from '../utils/is'
 import type { ApiModel, ChatContext, ChatGPTUnofficialProxyAPIOptions, ModelConfig } from '../types'
-import type { RequestOptions, SetProxyOptions, UsageResponse } from './types'
+import type { RequestOptions, UsageResponse } from './types'
 
 const { HttpsProxyAgent } = httpsProxyAgent
 
@@ -152,7 +152,7 @@ async function fetchUsage() {
     'Content-Type': 'application/json',
   }
 
-  const options = {} as SetProxyOptions
+  const options = {} as any
 
   setupProxy(options)
 
@@ -201,16 +201,24 @@ function setupProxy(options: ChatGPTAPIOptions | ChatGPTUnofficialProxyAPIOption
     : null
 
   if (httpsProxy) {
-    options.fetch = (input: string | URL | Request, init?: RequestInit) => {
+    options.fetch = (input: any, init?: any) => {
+      const agent = new HttpsProxyAgent(httpsProxy)
+      return fetch(input, { ...init, agent: agent as any })
+    }
+    /* options.fetch = (input: string | URL | Request, init?: RequestInit) => {
       const agent = new HttpsProxyAgent(httpsProxy)
       return fetch(input as URL | RequestInfo, { ...init, agent })
-    }
+    } */
   }
   else if (socksProxy) {
     const agent = new SocksProxyAgent(socksProxy)
-    options.fetch = (input: string | URL | Request, init?: RequestInit) => {
-      return fetch(input as URL | RequestInfo, { ...init, agent })
+    options.fetch = (input: any, init?: any) => {
+      return fetch(input, { ...init, agent: agent as any })
     }
+
+    /* options.fetch = (input: string | URL | Request, init?: RequestInit) => {
+      return fetch(input as URL | RequestInfo, { ...init, agent })
+    } */
   }
 }
 

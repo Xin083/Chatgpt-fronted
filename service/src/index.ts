@@ -1,12 +1,14 @@
-import express from 'express'
+// import express from 'express'
+import express, { type Express } from 'express'
 import type { RequestProps } from './types'
-import type { ChatMessage } from './chatgpt'
-import { chatConfig, chatReplyProcess, currentModel } from './chatgpt'
+import type { ChatMessage } from './chatgpt/index'
+import { chatConfig, chatReplyProcess, currentModel } from './chatgpt/index'
 import { auth } from './middleware/auth'
 import { limiter } from './middleware/limiter'
 import { isNotEmptyString } from './utils/is'
 
-const app = express()
+// const app = express()
+const app: Express = express()
 const router = express.Router()
 
 app.use(express.static('public'))
@@ -86,4 +88,23 @@ app.use('', router)
 app.use('/api', router)
 app.set('trust proxy', 1)
 
-app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))
+/* // app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))
+if (process.env.VERCEL === '1' || process.env.NOW_REGION) {
+  // Vercel 环境，导出 app
+  module.exports = app
+  // 如果用 ESModule，可用 export default app
+}
+else {
+  // 本地开发环境，启动监听
+  app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))
+  // app.listen(3002, () => {
+  //   console.log('Server is running on port 3002')
+  // })
+} */
+
+if (!process.env.VERCEL && !process.env.NOW_REGION) {
+  // 本地开发环境，启动监听
+  app.listen(3002, () => globalThis.console.log('Server is running on port 3002'))
+}
+
+export default app
