@@ -19,6 +19,10 @@
       "dest": "service/src/index.ts"
     },
     {
+      "src": "/(.*\\.(js|css|svg|png|jpg|jpeg|gif|ico|json|txt|woff|woff2|ttf|map))",
+      "dest": "/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
