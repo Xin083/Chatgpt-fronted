@@ -15,10 +15,10 @@
     "node": "^16 || ^18 || ^20"
   },
   "scripts": {
-    "start": "node build/index.mjs",
+    "start": "node build/index.js",
     "dev": "tsup src/index.ts --format esm --dts --watch",
-    "prod": "node ./build/index.mjs",
-    "build": "pnpm clean && tsup src/index.ts --format esm --dts --clean --outDir build && mv build/index.js build/index.mjs && ls -lR ./src && ls -lR ./build",
+    "prod": "node ./build/index.js",
+    "build": "pnpm clean && tsup src/index.ts --format esm --dts --clean --outDir build && ls -lR ./src && ls -lR ./build",
     "clean": "rimraf build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
